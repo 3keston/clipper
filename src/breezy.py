@@ -1,5 +1,6 @@
-import ollama  # type: ignore
 import curses
+import asyncio
+from ollama import AsyncClient
 
 
 class ChatApp:
@@ -11,7 +12,7 @@ class ChatApp:
         self.height -= 1  # Buffer a line at the bottom
         self.text_lines = [""]
         self.scroll_position = 0
-        self.scroll_adjust_step = int(self.height / 2.0) # clear half the page
+        self.scroll_adjust_step = int(self.height / 2.0)  # Clear half the page
         self.prompt_text = "> "
         self.history = []
 
@@ -45,12 +46,13 @@ class ChatApp:
                     pass
         self.screen.refresh()
 
-    def chat_with_ai(self, query):
+    async def chat_with_ai(self, query):
         """Send a query to the AI and display the response."""
         try:
             self.history.append({"role": "user", "content": query})
 
-            stream = ollama.chat(
+            async_client = AsyncClient()
+            stream = await async_client.chat(
                 model="llama3",
                 messages=self.history,
                 stream=True,
@@ -60,12 +62,12 @@ class ChatApp:
             self.add_text("Agent: ")
             agent_message = ""
 
-            for chunk in stream:
+            async for chunk in stream:
                 chunk_text = chunk["message"]["content"]
                 for char in chunk_text:
                     self.add_text(char)
                     agent_message += char
-                    curses.napms(10)
+                    await asyncio.sleep(0.01)  # Sleep asynchronously
 
             self.add_text("\n")
             self.history.append({"role": "assistant", "content": agent_message})
@@ -74,7 +76,7 @@ class ChatApp:
             self.add_text(f"\nError: {str(e)}\n")
             self.refresh_screen()
 
-    def get_user_input(self):
+    async def get_user_input(self):
         """Get user input from the screen."""
         prompt = self.prompt_text
         self.screen.addstr(0, 0, prompt)
@@ -86,16 +88,16 @@ class ChatApp:
         return user_input
 
 
-def main(screen):
+async def main(screen):
     """Main function to run the chat application."""
     curses.curs_set(1)
     app = ChatApp(screen)
 
     while True:
-        query = app.get_user_input()
+        query = await app.get_user_input()
         if query.lower() in ("exit", "quit"):
             break
-        app.chat_with_ai(query)
+        await app.chat_with_ai(query)
 
         # Return focus to the prompt area
         app.screen.move(0, len(app.prompt_text))
@@ -104,4 +106,4 @@ def main(screen):
 
 
 if __name__ == "__main__":
-    curses.wrapper(main)
+    curses.wrapper(lambda screen: asyncio.run(main(screen)))
