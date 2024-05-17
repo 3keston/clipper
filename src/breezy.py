@@ -4,7 +4,7 @@ Breezy
 
 import curses
 import asyncio
-from ollama import AsyncClient
+from ollama import AsyncClient # type: ignore
 
 class ChatApp:
     def __init__(self, screen):
