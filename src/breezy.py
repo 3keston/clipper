@@ -8,10 +8,10 @@ class ChatApp:
         self.cursor_x = 0
         self.cursor_y = 1  # Start below the prompt
         self.height, self.width = screen.getmaxyx()
-        self.height -= 1  # Buffer two lines at the bottom
+        self.height -= 1  # Buffer a line at the bottom
         self.text_lines = [""]
         self.scroll_position = 0
-        self.scroll_adjust_step = int(self.height / 2.0)
+        self.scroll_adjust_step = int(self.height / 2.0) # clear half the page
         self.prompt_text = "> "
         self.history = []
 
@@ -105,4 +105,3 @@ def main(screen):
 
 if __name__ == "__main__":
     curses.wrapper(main)
-    
