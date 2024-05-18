@@ -1,7 +1,3 @@
-"""
-Breezy
-"""
-
 import curses
 import asyncio
 from ollama import AsyncClient  # type: ignore
@@ -9,42 +5,51 @@ from ollama import AsyncClient  # type: ignore
 
 class ChatApp:
     def __init__(self, screen):
+        self.model = "llama3"
         self.screen = screen
         self.cursor_x = 0
         self.cursor_y = 1  # Start below the prompt
         self.height, self.width = screen.getmaxyx()
         self.height -= 1  # Buffer a line at the bottom
         self.text_lines = [""]
+        self.text_colors = [0]
         self.scroll_position = 0
-        self.scroll_adjust_step = int(self.height / 2.0)  # Clear half the page
+        self.scroll_adjust_step = 4  # int(self.height / 2.0)  # Clear half the page
         self.prompt_text = "> "
-        self.history = []
+        self.system_msg = f"""
+        You are a Breezy Bob, a helpful assistant who is confined to a terminal window.
+        You are powered by a total private local LLM called {self.model}.
+        """
+        self.history = [{"role": "user", "content": self.system_msg}]
 
         # Initialize colors
         curses.start_color()
         if curses.can_change_color():
-            # Define dark grey color
-            curses.init_color(16, 100, 100, 100)  # RGB values out of 1000
-            curses.init_color(17, 0, 1000, 1000)  # Neon cyan
-            curses.init_color(18, 1000, 0, 1000)  # Neon pink
-            curses.init_color(19, 1000, 1000, 0)  # Neon yellow
+            # Define Zenburn colors
+            curses.init_color(16, 205, 205, 182)  # Background
+            curses.init_color(17, 514, 569, 482)  # Foreground
+            curses.init_color(18, 333, 427, 216)  # Comment
+            curses.init_color(19, 705, 352, 353)  # Red
+            curses.init_color(20, 282, 462, 718)  # Blue
+            curses.init_color(21, 462, 718, 462)  # Green
+            curses.init_color(22, 689, 555, 386)  # Yellow
 
             # Define color pairs
-            curses.init_pair(1, 17, 16)  # User color (neon cyan on dark grey)
-            curses.init_pair(2, 18, 16)  # Agent color (neon pink on dark grey)
-            curses.init_pair(3, 19, 16)  # Prompt color (neon yellow on dark grey)
+            curses.init_pair(1, 17, 16)  # User color (foreground on background)
+            curses.init_pair(2, 19, 16)  # Agent color (red on background)
+            curses.init_pair(3, 22, 16)  # Prompt color (yellow on background)
         else:
             curses.init_pair(
-                1, curses.COLOR_CYAN, curses.COLOR_BLACK
-            )  # User color (neon cyan)
+                1, curses.COLOR_WHITE, curses.COLOR_BLACK
+            )  # User color (white on black)
             curses.init_pair(
-                2, curses.COLOR_MAGENTA, curses.COLOR_BLACK
-            )  # Agent color (neon pink)
+                2, curses.COLOR_RED, curses.COLOR_BLACK
+            )  # Agent color (red on black)
             curses.init_pair(
                 3, curses.COLOR_YELLOW, curses.COLOR_BLACK
-            )  # Prompt color (neon yellow)
+            )  # Prompt color (yellow on black)
 
-        # Set the entire screen background to dark grey (if supported)
+        # Set the entire screen background to Zenburn background color (if supported)
         self.screen.bkgd(
             " ",
             (
@@ -65,13 +70,15 @@ class ChatApp:
                     self.cursor_y = self.height - self.scroll_adjust_step
             while len(self.text_lines) <= self.cursor_y + self.scroll_position:
                 self.text_lines.append("")
+                self.text_colors.append(0)
             if char != "\n":
                 self.text_lines[self.cursor_y + self.scroll_position] += char
+                self.text_colors[self.cursor_y + self.scroll_position] = color_pair
                 self.cursor_x += 1
 
-        self.refresh_screen(color_pair)
+        self.refresh_screen()
 
-    def refresh_screen(self, color_pair=0):
+    def refresh_screen(self):
         """Refresh the screen with the current text buffer."""
         self.screen.clear()
         self.screen.addstr(
@@ -85,7 +92,7 @@ class ChatApp:
                         i,
                         0,
                         self.text_lines[line_index][: self.width],
-                        curses.color_pair(color_pair),
+                        curses.color_pair(self.text_colors[line_index]),
                     )
                 except curses.error:
                     pass
@@ -98,7 +105,7 @@ class ChatApp:
 
             async_client = AsyncClient()
             stream = await async_client.chat(
-                model="llama3",
+                model=self.model,
                 messages=self.history,
                 stream=True,
             )
