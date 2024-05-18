@@ -4,7 +4,8 @@ Breezy
 
 import curses
 import asyncio
-from ollama import AsyncClient # type: ignore
+from ollama import AsyncClient  # type: ignore
+
 
 class ChatApp:
     def __init__(self, screen):
@@ -27,18 +28,31 @@ class ChatApp:
             curses.init_color(17, 0, 1000, 1000)  # Neon cyan
             curses.init_color(18, 1000, 0, 1000)  # Neon pink
             curses.init_color(19, 1000, 1000, 0)  # Neon yellow
-        
+
             # Define color pairs
             curses.init_pair(1, 17, 16)  # User color (neon cyan on dark grey)
             curses.init_pair(2, 18, 16)  # Agent color (neon pink on dark grey)
             curses.init_pair(3, 19, 16)  # Prompt color (neon yellow on dark grey)
         else:
-            curses.init_pair(1, curses.COLOR_CYAN, curses.COLOR_BLACK)  # User color (neon cyan)
-            curses.init_pair(2, curses.COLOR_MAGENTA, curses.COLOR_BLACK)  # Agent color (neon pink)
-            curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Prompt color (neon yellow)
-        
+            curses.init_pair(
+                1, curses.COLOR_CYAN, curses.COLOR_BLACK
+            )  # User color (neon cyan)
+            curses.init_pair(
+                2, curses.COLOR_MAGENTA, curses.COLOR_BLACK
+            )  # Agent color (neon pink)
+            curses.init_pair(
+                3, curses.COLOR_YELLOW, curses.COLOR_BLACK
+            )  # Prompt color (neon yellow)
+
         # Set the entire screen background to dark grey (if supported)
-        self.screen.bkgd(' ', curses.color_pair(1) | curses.COLOR_BLACK if curses.can_change_color() else curses.COLOR_BLACK)
+        self.screen.bkgd(
+            " ",
+            (
+                curses.color_pair(1) | curses.COLOR_BLACK
+                if curses.can_change_color()
+                else curses.COLOR_BLACK
+            ),
+        )
 
     def add_text(self, text, color_pair=0):
         """Add text to the screen, handling new lines and scrolling."""
@@ -60,12 +74,19 @@ class ChatApp:
     def refresh_screen(self, color_pair=0):
         """Refresh the screen with the current text buffer."""
         self.screen.clear()
-        self.screen.addstr(0, 0, self.prompt_text, curses.color_pair(3))  # Add the prompt at the top
+        self.screen.addstr(
+            0, 0, self.prompt_text, curses.color_pair(3)
+        )  # Add the prompt at the top
         for i in range(1, self.height):
             line_index = i + self.scroll_position - 1
             if line_index < len(self.text_lines):
                 try:
-                    self.screen.addstr(i, 0, self.text_lines[line_index][: self.width], curses.color_pair(color_pair))
+                    self.screen.addstr(
+                        i,
+                        0,
+                        self.text_lines[line_index][: self.width],
+                        curses.color_pair(color_pair),
+                    )
                 except curses.error:
                     pass
         self.screen.refresh()
