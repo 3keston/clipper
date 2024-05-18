@@ -1,3 +1,7 @@
+"""
+Breezy
+"""
+
 import curses
 import asyncio
 from ollama import AsyncClient  # type: ignore
@@ -14,18 +18,18 @@ class ChatApp:
         self.text_lines = [""]
         self.text_colors = [0]
         self.scroll_position = 0
-        self.scroll_adjust_step = 4  # int(self.height / 2.0)  # Clear half the page
+        self.scroll_adjust_step = 4
         self.prompt_text = "> "
         self.system_msg = f"""
-        You are a Breezy Bob, a helpful assistant who is confined to a terminal window.
-        You are powered by a total private local LLM called {self.model}.
+        You are Breezy Bob, a helpful assistant confined to a terminal window.
+        You are powered by a totally private local LLM called {self.model}.
         """
         self.history = [{"role": "user", "content": self.system_msg}]
+        self.setup_colors()
 
-        # Initialize colors
+    def setup_colors(self):
         curses.start_color()
         if curses.can_change_color():
-            # Define Zenburn colors
             curses.init_color(16, 205, 205, 182)  # Background
             curses.init_color(17, 514, 569, 482)  # Foreground
             curses.init_color(18, 333, 427, 216)  # Comment
@@ -33,8 +37,6 @@ class ChatApp:
             curses.init_color(20, 282, 462, 718)  # Blue
             curses.init_color(21, 462, 718, 462)  # Green
             curses.init_color(22, 689, 555, 386)  # Yellow
-
-            # Define color pairs
             curses.init_pair(1, 17, 16)  # User color (foreground on background)
             curses.init_pair(2, 19, 16)  # Agent color (red on background)
             curses.init_pair(3, 22, 16)  # Prompt color (yellow on background)
@@ -48,19 +50,9 @@ class ChatApp:
             curses.init_pair(
                 3, curses.COLOR_YELLOW, curses.COLOR_BLACK
             )  # Prompt color (yellow on black)
-
-        # Set the entire screen background to Zenburn background color (if supported)
-        self.screen.bkgd(
-            " ",
-            (
-                curses.color_pair(1) | curses.COLOR_BLACK
-                if curses.can_change_color()
-                else curses.COLOR_BLACK
-            ),
-        )
+        self.screen.bkgd(" ", curses.color_pair(1))
 
     def add_text(self, text, color_pair=0):
-        """Add text to the screen, handling new lines and scrolling."""
         for char in text:
             if char == "\n" or self.cursor_x >= self.width:
                 self.cursor_x = 0
@@ -75,15 +67,11 @@ class ChatApp:
                 self.text_lines[self.cursor_y + self.scroll_position] += char
                 self.text_colors[self.cursor_y + self.scroll_position] = color_pair
                 self.cursor_x += 1
-
         self.refresh_screen()
 
     def refresh_screen(self):
-        """Refresh the screen with the current text buffer."""
         self.screen.clear()
-        self.screen.addstr(
-            0, 0, self.prompt_text, curses.color_pair(3)
-        )  # Add the prompt at the top
+        self.screen.addstr(0, 0, self.prompt_text, curses.color_pair(3))
         for i in range(1, self.height):
             line_index = i + self.scroll_position - 1
             if line_index < len(self.text_lines):
@@ -99,28 +87,23 @@ class ChatApp:
         self.screen.refresh()
 
     async def chat_with_ai(self, query):
-        """Send a query to the AI and display the response."""
         try:
             self.history.append({"role": "user", "content": query})
-
             async_client = AsyncClient()
             stream = await async_client.chat(
                 model=self.model,
                 messages=self.history,
                 stream=True,
             )
-
             self.add_text(f"User: {query}\n", color_pair=1)
             self.add_text("Agent: ", color_pair=2)
             agent_message = ""
-
             async for chunk in stream:
                 chunk_text = chunk["message"]["content"]
                 for char in chunk_text:
                     self.add_text(char, color_pair=2)
                     agent_message += char
-                    await asyncio.sleep(0.01)  # Sleep asynchronously
-
+                    await asyncio.sleep(0.01)
             self.add_text("\n", color_pair=2)
             self.history.append({"role": "assistant", "content": agent_message})
             self.refresh_screen()
@@ -129,10 +112,9 @@ class ChatApp:
             self.refresh_screen()
 
     async def get_user_input(self):
-        """Get user input from the screen."""
         prompt = self.prompt_text
         self.screen.addstr(0, 0, prompt, curses.color_pair(3))
-        self.screen.clrtoeol()  # Clear the input line
+        self.screen.clrtoeol()
         self.screen.refresh()
         curses.echo()
         user_input = self.screen.getstr(0, len(prompt)).decode("utf-8")
@@ -141,19 +123,15 @@ class ChatApp:
 
 
 async def main(screen):
-    """Main function to run the chat application."""
     curses.curs_set(1)
     app = ChatApp(screen)
-
     while True:
         query = await app.get_user_input()
         if query.lower() in ("exit", "quit"):
             break
         await app.chat_with_ai(query)
-
-        # Return focus to the prompt area
         app.screen.move(0, len(app.prompt_text))
-        app.screen.clrtoeol()  # Clear the input line after moving cursor
+        app.screen.clrtoeol()
         app.screen.refresh()
 
 
