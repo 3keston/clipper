@@ -12,12 +12,6 @@ import base64
 import pyperclip  # type: ignore
 
 
-def convert_image_to_base64(image):
-    buffered = io.BytesIO()
-    image.save(buffered, format="PNG")
-    return base64.b64encode(buffered.getvalue()).decode()
-
-
 # Define the Breezy chat application
 class ChatApp:
     def __init__(self, screen):
@@ -146,9 +140,11 @@ class ChatApp:
             ):
                 width, height = current_clipboard.size
                 self.add_text(
-                    f"\nCaught a new clip! - ({width}x{height}).\n", color_pair=3
+                    f"\nCaught a clip! - ({width}x{height}).\n", color_pair=3
                 )
-                base64_image = convert_image_to_base64(current_clipboard)
+                buffered = io.BytesIO()
+                current_clipboard.save(buffered, format="PNG")
+                base64_image = base64.b64encode(buffered.getvalue()).decode()
                 last_clipboard = current_clipboard
                 pyperclip.copy("")  # Clear the clipboard
                 return base64_image, last_clipboard
