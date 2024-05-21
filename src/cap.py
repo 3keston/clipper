@@ -2,7 +2,7 @@ import time
 from PIL import ImageGrab, Image
 import datetime
 import base64
-import requests
+import requests # type: ignore
 import json
 import io
 
