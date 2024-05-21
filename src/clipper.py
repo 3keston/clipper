@@ -119,7 +119,7 @@ class ChatApp:
                     agent_message += char
                     await asyncio.sleep(0.01)
             self.add_text("\n", color_pair=2)
-            messages[-1]['images'] = None
+            messages[-1]['images'] = None # llava jumbles more than one image
             self.history.append({"role": "assistant", "content": agent_message})
             self.refresh_screen()
         except Exception as e:
