@@ -1,9 +1,5 @@
-"""
-Cap your screen from clipboard and send the image data to Ollama.
-"""
-
 import time
-from PIL import ImageGrab
+from PIL import ImageGrab, Image
 import datetime
 import base64
 import requests
@@ -50,8 +46,10 @@ def main():
         # Try to capture an image from the clipboard
         try:
             current_clipboard = ImageGrab.grabclipboard()
-            if current_clipboard and current_clipboard != last_clipboard:
+            if isinstance(current_clipboard, Image.Image) and current_clipboard != last_clipboard:
                 print("Clipboard changed!")
+                width, height = current_clipboard.size
+                print(f"Image dimensions: {width}x{height}")
                 image_base64 = get_image_base64(current_clipboard)
                 send_image_to_ollama(image_base64)
                 last_clipboard = current_clipboard
