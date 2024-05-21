@@ -141,7 +141,7 @@ class ChatApp:
             current_clipboard = ImageGrab.grabclipboard()
             if isinstance(current_clipboard, Image.Image) and current_clipboard != last_clipboard:
                 width, height = current_clipboard.size
-                self.add_text(f"\nCaught a new  clip! ({width}x{height}).\n", color_pair=3)
+                self.add_text(f"\nCaught a new clip! - ({width}x{height}).\n", color_pair=3)
                 base64_image = convert_image_to_base64(current_clipboard)
                 last_clipboard = current_clipboard
                 return base64_image, last_clipboard
