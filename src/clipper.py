@@ -9,13 +9,14 @@ from ollama import AsyncClient  # type: ignore
 from PIL import ImageGrab, Image
 import io
 import base64
-import time
+import pyperclip  # type: ignore
 
 
 def convert_image_to_base64(image):
     buffered = io.BytesIO()
     image.save(buffered, format="PNG")
     return base64.b64encode(buffered.getvalue()).decode()
+
 
 # Define the Breezy chat application
 class ChatApp:
@@ -103,7 +104,7 @@ class ChatApp:
             async_client = AsyncClient()
             messages = self.history
             if base64_image:
-                messages[-1]['images'] = [base64_image]
+                messages[-1]["images"] = [base64_image]
             stream = await async_client.chat(
                 model=self.model,
                 messages=messages,
@@ -119,7 +120,7 @@ class ChatApp:
                     agent_message += char
                     await asyncio.sleep(0.01)
             self.add_text("\n", color_pair=2)
-            messages[-1]['images'] = None # llava jumbles more than one image
+            messages[-1]["images"] = None  # llava jumbles more than one image
             self.history.append({"role": "assistant", "content": agent_message})
             self.refresh_screen()
         except Exception as e:
@@ -139,15 +140,22 @@ class ChatApp:
     async def check_clipboard(self, last_clipboard):
         try:
             current_clipboard = ImageGrab.grabclipboard()
-            if isinstance(current_clipboard, Image.Image) and current_clipboard != last_clipboard:
+            if (
+                isinstance(current_clipboard, Image.Image)
+                and current_clipboard != last_clipboard
+            ):
                 width, height = current_clipboard.size
-                self.add_text(f"\nCaught a new clip! - ({width}x{height}).\n", color_pair=3)
+                self.add_text(
+                    f"\nCaught a new clip! - ({width}x{height}).\n", color_pair=3
+                )
                 base64_image = convert_image_to_base64(current_clipboard)
                 last_clipboard = current_clipboard
+                pyperclip.copy("")  # Clear the clipboard
                 return base64_image, last_clipboard
         except Exception as e:
             self.add_text(f"\nError checking clipboard: {str(e)}\n", color_pair=2)
         return None, last_clipboard
+
 
 async def main(screen):
     curses.curs_set(1)
@@ -157,16 +165,17 @@ async def main(screen):
         query = await app.get_user_input()
         if query.lower() in ("exit", "quit"):
             break
-        
+
         base64_image, last_clipboard = await app.check_clipboard(last_clipboard)
         if base64_image:
             await app.chat_with_ai(query, base64_image)
         else:
             await app.chat_with_ai(query)
-        
+
         app.screen.move(0, len(app.prompt_text))
         app.screen.clrtoeol()
         app.screen.refresh()
+
 
 if __name__ == "__main__":
     curses.wrapper(lambda screen: asyncio.run(main(screen)))
