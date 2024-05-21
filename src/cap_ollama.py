@@ -5,10 +5,7 @@ clipper with ollama api
 import time
 from PIL import ImageGrab, Image
 import datetime
-import requests
-import json
-import io
-import ollama
+import ollama  # type: ignore
 
 def save_image_to_file(image, file_path):
     image.save(file_path, format="PNG")
