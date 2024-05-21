@@ -101,7 +101,7 @@ class ChatApp:
         try:
             self.history.append({"role": "user", "content": query})
             async_client = AsyncClient()
-            messages = self.history.copy()
+            messages = self.history
             if base64_image:
                 messages[-1]['images'] = [base64_image]
             stream = await async_client.chat(
@@ -119,6 +119,7 @@ class ChatApp:
                     agent_message += char
                     await asyncio.sleep(0.01)
             self.add_text("\n", color_pair=2)
+            messages[-1]['images'] = None
             self.history.append({"role": "assistant", "content": agent_message})
             self.refresh_screen()
         except Exception as e:
