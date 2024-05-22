@@ -14,8 +14,8 @@ import pyperclip  # type: ignore
 
 # Define the Breezy chat application
 class ChatApp:
-    def __init__(self, screen):
-        self.model = "llava"
+    def __init__(self, screen, model):
+        self.model = model
         self.screen = screen
         self.cursor_x = 0
         self.cursor_y = 1  # Start below the prompt
@@ -191,7 +191,8 @@ class ChatApp:
 
 async def main(screen):
     curses.curs_set(1)
-    app = ChatApp(screen)
+    model = "llava"
+    app = ChatApp(screen, model)
     last_clipboard = None
     while True:
         query = await app.get_user_input()
