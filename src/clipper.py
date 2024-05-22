@@ -39,7 +39,7 @@ class ChatApp:
             # Convert RGB values from 0-255 to 0-1000
             def rgb_to_curses(r, g, b):
                 return int(r * 1000 / 255), int(g * 1000 / 255), int(b * 1000 / 255)
-            
+
             # Define Zernburn colors
             bg = rgb_to_curses(63, 63, 63)  # Background
             fg = rgb_to_curses(220, 220, 204)  # Foreground
@@ -50,7 +50,7 @@ class ChatApp:
             magenta = rgb_to_curses(220, 140, 195)  # Magenta
             cyan = rgb_to_curses(140, 208, 211)  # Cyan
             white = rgb_to_curses(220, 220, 204)  # White
-            
+
             # Bold versions of the colors
             bold_red = rgb_to_curses(220, 163, 163)  # Bold Red
             bold_green = rgb_to_curses(195, 191, 159)  # Bold Green
@@ -58,7 +58,7 @@ class ChatApp:
             bold_blue = rgb_to_curses(148, 191, 243)  # Bold Blue
             bold_magenta = rgb_to_curses(236, 147, 211)  # Bold Magenta
             bold_cyan = rgb_to_curses(147, 224, 227)  # Bold Cyan
-            
+
             # Initialize colors
             curses.init_color(16, *bg)  # Background
             curses.init_color(17, *fg)  # Foreground
@@ -69,7 +69,7 @@ class ChatApp:
             curses.init_color(22, *magenta)  # Magenta
             curses.init_color(23, *cyan)  # Cyan
             curses.init_color(24, *white)  # White
-            
+
             # Initialize bold colors
             curses.init_color(25, *bold_red)  # Bold Red
             curses.init_color(26, *bold_green)  # Bold Green
@@ -77,7 +77,7 @@ class ChatApp:
             curses.init_color(28, *bold_blue)  # Bold Blue
             curses.init_color(29, *bold_magenta)  # Bold Magenta
             curses.init_color(30, *bold_cyan)  # Bold Cyan
-            
+
             # Define color pairs
             curses.init_pair(1, 17, 16)  # Foreground on Background
             curses.init_pair(2, 25, 16)  # Bold Red on Background (Agent color)
@@ -88,10 +88,16 @@ class ChatApp:
             curses.init_pair(7, 23, 16)  # Cyan on Background
             curses.init_pair(8, 24, 16)  # White on Background
         else:
-            curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)  # User color (white on black)
-            curses.init_pair(2, curses.COLOR_RED, curses.COLOR_BLACK)  # Agent color (red on black)
-            curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)  # Prompt color (yellow on black)
-        
+            curses.init_pair(
+                1, curses.COLOR_WHITE, curses.COLOR_BLACK
+            )  # User color (white on black)
+            curses.init_pair(
+                2, curses.COLOR_RED, curses.COLOR_BLACK
+            )  # Agent color (red on black)
+            curses.init_pair(
+                3, curses.COLOR_YELLOW, curses.COLOR_BLACK
+            )  # Prompt color (yellow on black)
+
         self.screen.bkgd(" ", curses.color_pair(1))
 
     def add_text(self, text, color_pair=0):
@@ -175,9 +181,7 @@ class ChatApp:
                 and current_clipboard != last_clipboard
             ):
                 width, height = current_clipboard.size
-                self.add_text(
-                    f"\nCaught a clip! - ({width}x{height}).\n", color_pair=3
-                )
+                self.add_text(f"\nCaught a clip! - ({width}x{height}).\n", color_pair=3)
                 buffered = io.BytesIO()
                 current_clipboard.save(buffered, format="PNG")
                 base64_image = base64.b64encode(buffered.getvalue()).decode()
