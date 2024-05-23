@@ -1,7 +1,7 @@
 
 # Clipper
 
-<img src="clipper.webp" alt="Clipper Image" width="250" height="250">
+<img src="assets/clipper.webp" alt="Clipper Image" width="250" height="250">
 
 Clipper is designed to provide a seamless and intuitive chat experience, leveraging clipboard content to enhance the context and relevance of interactions with a local language model.
 
@@ -45,3 +45,7 @@ python src/main.py
 
 - **Copy an Image to Clipboard**: You can copy an image by right-clicking on it and selecting "Copy Image". On Mac, you can also use the screenshot tool by pressing `Cmd + Shift + 4` and selecting the area you want to capture. The captured image will be automatically copied to the clipboard.
 - **Copy Text to Clipboard**: Simply select the text you want to copy and use the copy command (usually `Cmd + C` on Mac or `Ctrl + C` on Windows). The copied text will be included in your chat query for a more comprehensive interaction.
+
+### Demo
+
+![App Usage Example](assets/clipper_demo.gif)
