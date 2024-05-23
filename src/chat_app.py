@@ -13,6 +13,7 @@ import pyperclip  # type: ignore
 
 from color_setup import change_colors
 
+
 # Define the Breezy chat application
 class ChatApp:
     def __init__(self, screen, model):

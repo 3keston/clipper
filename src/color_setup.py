@@ -1,5 +1,6 @@
 import curses
 
+
 def change_colors():
     curses.start_color()
     if curses.can_change_color():

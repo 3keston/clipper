@@ -8,6 +8,7 @@ import asyncio
 from chat_app import ChatApp
 from config import config
 
+
 async def main(screen):
     model = config["model"]
     app = ChatApp(screen, model)

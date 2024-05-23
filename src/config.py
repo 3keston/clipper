@@ -1,3 +1,1 @@
-config = {
-    "model": "llava-phi3"
-}
+config = {"model": "llava-phi3"}
