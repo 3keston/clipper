@@ -30,7 +30,7 @@ The application continuously monitors the system clipboard for new content, dete
    - Visit [Ollama's website](https://ollama.com/) and follow the instructions to install Ollama.
    - Pull the required model:
      ```sh
-     ollama pull llava-phi3
+     ollama pull llava-phi3 # or other vision models like llava-llama3 and update the config.py
      ```
 
 ## Usage
