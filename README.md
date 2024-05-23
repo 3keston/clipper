@@ -5,7 +5,7 @@
 
 Clipper is designed to provide a seamless and intuitive chat experience, leveraging clipboard content to enhance the context and relevance of interactions with a local language model.
 
-The application continuously monitors the system clipboard for new content, detecting both text and image data copied to the clipboard. Upon detecting an image, Clipper 0.1 then includes it in the chat query, enhancing the assistant's ability to provide relevant responses. For text content, it appends the clipboard text to the user's query for a comprehensive interaction.
+The application continuously monitors the system clipboard for new content, detecting both text and image data copied to the clipboard. Upon detecting an image, Clipper then includes it in the chat query, enhancing the assistant's ability to provide relevant responses. For text content, it appends the clipboard text to the user's query for a comprehensive interaction.
 
 ## Installation
 
@@ -40,3 +40,8 @@ After completing the installation steps, you can start the application with the 
 ```sh
 python src/main.py
 ```
+
+### How to Use Clipper
+
+- **Copy an Image to Clipboard**: You can copy an image by right-clicking on it and selecting "Copy Image". On Mac, you can also use the screenshot tool by pressing `Cmd + Shift + 4` and selecting the area you want to capture. The captured image will be automatically copied to the clipboard.
+- **Copy Text to Clipboard**: Simply select the text you want to copy and use the copy command (usually `Cmd + C` on Mac or `Ctrl + C` on Windows). The copied text will be included in your chat query for a more comprehensive interaction.
