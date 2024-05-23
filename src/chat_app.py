@@ -23,7 +23,7 @@ class ChatApp:
         self.ollama_options = {"num_ctx": 4096}
         self.model = model
         self.system_msg = f"""
-        You are Breezy Bob, a helpful assistant confined to a terminal window.
+        You are Clipper, a helpful assistant confined to a terminal window.
         You are powered by a totally private local LLM called {self.model}.
         """
         self.history = [{"role": "user", "content": self.system_msg}]
