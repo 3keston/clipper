@@ -1,7 +1,7 @@
 
 # Clipper
 
-<img src="assets/clipper.webp" alt="Clipper Image" width="250" height="250">
+<img src="assets/clipper.webp" alt="Clipper Image" width="300" height="300">
 
 Clipper is designed to provide a seamless and intuitive chat experience, leveraging clipboard content to enhance the context and relevance of interactions with a local language model.
 
