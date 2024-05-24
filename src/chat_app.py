@@ -12,21 +12,18 @@ import base64
 import pyperclip  # type: ignore
 
 from color_setup import change_colors
+from config import config
 
 
-# Define the Breezy chat application
 class ChatApp:
-    def __init__(self, screen, model):
+    def __init__(self, screen):
         curses.curs_set(1)
         pyperclip.copy("")  # clear clipboard before start
         # ollama config
         self.ollama_client = AsyncClient()
-        self.ollama_options = {"num_ctx": 4096}
-        self.model = model
-        self.system_msg = f"""
-        You are Clipper, a helpful assistant confined to a terminal window.
-        You are powered by a totally private local LLM called {self.model}.
-        """
+        self.ollama_options = config["ollama_options"]
+        self.model = config["model"]
+        self.system_msg = config["system_msg"]
         self.history = [{"role": "user", "content": self.system_msg}]
         # screen config
         self.screen = screen
@@ -37,7 +34,7 @@ class ChatApp:
         self.text_lines = [""]
         self.text_colors = [0]
         self.scroll_position = 0
-        self.scroll_adjust_step = 4
+        self.scroll_adjust_step = 4  # num lines to scroll up when hitting the bottom
         self.prompt_text = "> "
         self.setup_colors()
 

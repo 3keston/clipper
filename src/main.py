@@ -10,8 +10,7 @@ from config import config
 
 
 async def main(screen):
-    model = config["model"]
-    app = ChatApp(screen, model)
+    app = ChatApp(screen)
     last_clipboard = None
     while True:
         query = await app.get_user_input()
