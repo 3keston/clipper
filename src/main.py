@@ -21,11 +21,10 @@ async def main(screen):
         clipboard_content, last_clipboard = await app.check_clipboard(last_clipboard)
         if clipboard_content:
             content_type, content = clipboard_content
-            match content_type:
-                case "image":
-                    await app.chat_with_ai(query, base64_image=content)
-                case "text":
-                    await app.chat_with_ai(query, text=content)
+            if content_type == "image":
+                await app.chat_with_ai(query, base64_image=content)
+            elif content_type == "text":
+                await app.chat_with_ai(query, text=content)
         else:
             await app.chat_with_ai(query)
 
