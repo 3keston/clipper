@@ -1,7 +1,7 @@
 """ config
 """
 
-model = "llava-phi3"
+model = "llama3.2-vision"
 
 config = {
     "model": model,
