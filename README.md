@@ -9,29 +9,30 @@ The application continuously monitors the system clipboard for new content, dete
 
 ## Installation
 
+Clipper requires **Python 3.9 or newer** and uses no third-party Python packages on
+macOS or Linux. Its terminal interface uses Python's `curses` module, so native
+Windows requires a Python runtime that provides `curses` (or use WSL).
+Clipboard access is provided by native tools:
+
+- **macOS:** the built-in `pbpaste`, `pbcopy`, and `osascript` commands.
+- **Windows:** PowerShell.
+- **Linux:** `wl-clipboard` on Wayland or `xclip` on X11.
+
 1. **Clone the repository**:
    ```sh
    git clone https://github.com/3keston/clipper
    cd clipper
    ```
 
-2. **Create and activate a virtual environment**:
-   ```sh
-   python -m venv venv
-   source venv/bin/activate   # On Windows use `venv\Scripts\activate`
-   ```
-
-3. **Install the required dependencies**:
-   ```sh
-   pip install -r requirements.txt
-   ```
-
-4. **Install Ollama and download the required model**:
+2. **Install Ollama and download the required model**:
    - Visit [Ollama's website](https://ollama.com/) and follow the instructions to install Ollama.
    - Pull the required model:
      ```sh
-     ollama pull llava-phi3 # or another vision model like llava-llama3, then update the config.py
+     ollama pull llama3.2-vision
      ```
+
+There is no `pip install` step and no `requirements.txt`. To use an Ollama server
+other than `http://127.0.0.1:11434`, set the `OLLAMA_HOST` environment variable.
 
 ## Usage
 
@@ -58,6 +59,14 @@ python src/main.py
 ### Demo
 
 ![App Usage Example](assets/clipper_demo.gif)
+
+## Tests
+
+Run the standard-library test suite without installing any packages:
+
+```sh
+python -m unittest discover -s tests -v
+```
 
 ## Troubleshooting
 

@@ -6,18 +6,16 @@ import curses
 import asyncio
 
 from chat_app import ChatApp
-from config import config
 
 
 async def main(screen):
     app = ChatApp(screen)
-    last_clipboard = None
     while True:
         query = await app.get_user_input()
         if query.lower() in ("exit", "quit"):
             break
 
-        clipboard_content, last_clipboard = await app.check_clipboard(last_clipboard)
+        clipboard_content = await app.check_clipboard()
         if clipboard_content:
             content_type, content = clipboard_content
             if content_type == "image":

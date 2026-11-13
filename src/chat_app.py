@@ -5,22 +5,21 @@ clipper 0.1
 # Import necessary modules
 import curses
 import asyncio
-from ollama import AsyncClient  # type: ignore
-from PIL import ImageGrab, Image
-import io
 import base64
-import pyperclip  # type: ignore
 
 from color_setup import change_colors
 from config import config
+from native_clipboard import Clipboard
+from ollama_client import OllamaClient
 
 
 class ChatApp:
     def __init__(self, screen):
         curses.curs_set(1)
-        pyperclip.copy("")  # clear clipboard before start
+        self.clipboard = Clipboard()
+        self.clipboard.clear()  # clear clipboard before start
         # ollama config
-        self.ollama_client = AsyncClient()
+        self.ollama_client = OllamaClient()
         self.ollama_options = config["ollama_options"]
         self.model = config["model"]
         self.system_msg = config["system_msg"]
@@ -82,7 +81,7 @@ class ChatApp:
             messages = self.history
             if base64_image:
                 for m in messages:
-                    m["images"] = None
+                    m.pop("images", None)
             if text:
                 query = f"{query}\nUser clipboard:\n{text}"
             current_message = {"role": "user", "content": query}
@@ -92,18 +91,20 @@ class ChatApp:
             stream = await self.ollama_client.chat(
                 model=self.model,
                 messages=messages,
-                stream=True,
                 options=self.ollama_options,
             )
             self.add_text(f"User: {query}\n", color_pair=1)
             self.add_text("Agent: ", color_pair=2)
             agent_message = ""
-            async for chunk in stream:
-                chunk_text = chunk["message"]["content"]
-                for char in chunk_text:
-                    self.add_text(char, color_pair=2)
-                    agent_message += char
-                    await asyncio.sleep(0.01)
+            try:
+                async for chunk in stream:
+                    chunk_text = chunk["message"]["content"]
+                    for char in chunk_text:
+                        self.add_text(char, color_pair=2)
+                        agent_message += char
+                        await asyncio.sleep(0.01)
+            finally:
+                await stream.aclose()
             self.add_text("\n", color_pair=2)
             self.history.append({"role": "assistant", "content": agent_message})
             self.refresh_screen()
@@ -121,36 +122,25 @@ class ChatApp:
         curses.noecho()
         return user_input
 
-    async def check_clipboard(self, last_clipboard):
+    async def check_clipboard(self):
         try:
-            current_clipboard = ImageGrab.grabclipboard()
+            clip = await asyncio.to_thread(self.clipboard.read)
+            if clip is None:
+                return None
 
-            # Check if the clipboard contains an image
-            if (
-                isinstance(current_clipboard, Image.Image)
-                and current_clipboard != last_clipboard
-            ):
-                width, height = current_clipboard.size
+            await asyncio.to_thread(self.clipboard.clear)
+            if clip.kind == "image":
+                width, height = clip.size
                 self.add_text(
                     f"\nCaught an image clip! - ({width}x{height}).\n", color_pair=3
                 )
-                buffered = io.BytesIO()
-                current_clipboard.save(buffered, format="PNG")
-                base64_image = base64.b64encode(buffered.getvalue()).decode()
-                last_clipboard = current_clipboard
-                pyperclip.copy("")  # Clear the clipboard
-                return ("image", base64_image), last_clipboard
+                base64_image = base64.b64encode(clip.content).decode("ascii")
+                return "image", base64_image
 
-            # Check if the clipboard contains text
-            clipboard_text = pyperclip.paste()
-            if clipboard_text and clipboard_text != last_clipboard:
-                self.add_text(f"\nCaught a text clip!\n", color_pair=3)
-                text_data = clipboard_text
-                last_clipboard = clipboard_text
-                pyperclip.copy("")  # Clear the clipboard
-                return ("text", text_data), last_clipboard
+            self.add_text("\nCaught a text clip!\n", color_pair=3)
+            return "text", clip.content
 
         except Exception as e:
             self.add_text(f"\nError checking clipboard: {str(e)}\n", color_pair=2)
 
-        return None, last_clipboard
+        return None
